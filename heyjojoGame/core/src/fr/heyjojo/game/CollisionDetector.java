@@ -1,13 +1,16 @@
 package fr.heyjojo.game;
 
+import java.math.BigDecimal;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Array;
 
 import fr.heyjojo.game.Collision.BlockType;
 import fr.heyjojo.game.Element.ElementType;
 
-public class IntersectorActor extends Actor {
+public class CollisionDetector {
 
 	private Array<Element> obstacles;
 
@@ -29,7 +32,7 @@ public class IntersectorActor extends Actor {
 
 	Array<Element> dynamicElements = new Array<Element>();
 
-	public IntersectorActor() {
+	public CollisionDetector() {
 		super();
 	}
 
@@ -43,42 +46,39 @@ public class IntersectorActor extends Actor {
 
 	private CollisionStep collisionStep = CollisionStep.PREPARE;
 
-	float currentCollisionTime;
+	double currentCollisionTime;
 
 	boolean stepByStep = true;
 
-	@Override
-	public void act(float delta) {
+	public void detectCollisions() {
 
 		if (checkCollisions) {
-			
-			
-			
+
 			if (!stepByStep || collisionStep == CollisionStep.PREPARE) {
 				// PREPARE
 				for (Element dynaElement : dynamicElements) {
 					dynaElement.prepareForCollisionDetection();
-					
+
 					MyRectangle prev = dynaElement.getPreviousBounds();
 					MyRectangle curr = dynaElement.getCurrentBounds();
-					
-					Gdx.app.debug("Start dynaElement","-------------");
+
+					Gdx.app.debug("Start dynaElement", "-------------");
 					debugRect(prev);
 					debugRect(curr);
-					Gdx.app.debug("End dynaElement","-------------");
-					
+					Gdx.app.debug("End dynaElement", "-------------");
+
 				}
 
 				for (Element obstacle : obstacles) {
 					obstacle.prepareForCollisionDetection();
-					
+
 					MyRectangle prev = obstacle.getPreviousBounds();
 					MyRectangle curr = obstacle.getCurrentBounds();
-					
-					Gdx.app.debug("Start obstacle","-------------");
+
+					Gdx.app.debug("Start obstacle", "-------------");
 					debugRect(prev);
 					debugRect(curr);
-					Gdx.app.debug("End obstacle","-------------");
+					Gdx.app.debug("End obstacle", "-------------");
 				}
 				currentCollisionTime = 0f;
 				collisionStep = CollisionStep.COLLIDE;
@@ -88,7 +88,7 @@ public class IntersectorActor extends Actor {
 
 				Collision closestCollison;
 				boolean hasMoreThanOneCollision;
-				
+
 				do {
 					// FIND CLOSEST
 					closestCollison = null;
@@ -97,7 +97,8 @@ public class IntersectorActor extends Actor {
 						Element dynaElementA = dynamicElements.get(i);
 						for (int j = i + 1; j < dynamicElements.size; j++) {
 							Element dynaElementB = dynamicElements.get(j);
-							if (evalCollision(dynaElementA, dynaElementB, currentCollisionTime) && (evaluatedCollision.doUpdateElementAPosition || evaluatedCollision.doUpdateElementBPosition)) {
+							if (evalCollision(dynaElementA, dynaElementB, currentCollisionTime)
+									&& (evaluatedCollision.doUpdateElementAPosition || evaluatedCollision.doUpdateElementBPosition)) {
 								if (closestCollison == null) {
 									closestCollison = new Collision(evaluatedCollision);
 								} else if (closestCollison.getTime() >= evaluatedCollision.getTime()) {
@@ -109,7 +110,8 @@ public class IntersectorActor extends Actor {
 						}
 						// @TODO Optimiser le traitement des élements statiques
 						for (Element staticElementB : obstacles) {
-							if (evalCollision(dynaElementA, staticElementB, currentCollisionTime) && (evaluatedCollision.doUpdateElementAPosition || evaluatedCollision.doUpdateElementBPosition)) {
+							if (evalCollision(dynaElementA, staticElementB, currentCollisionTime)
+									&& (evaluatedCollision.doUpdateElementAPosition || evaluatedCollision.doUpdateElementBPosition)) {
 
 								if (closestCollison == null) {
 									closestCollison = new Collision(evaluatedCollision);
@@ -155,7 +157,7 @@ public class IntersectorActor extends Actor {
 						} else {
 							collisionStep = CollisionStep.AFTER;
 						}
-						
+
 					}
 
 				} while (closestCollison != null
@@ -180,10 +182,10 @@ public class IntersectorActor extends Actor {
 	}
 
 	private void debugRect(MyRectangle rect) {
-		Gdx.app.debug("Rect", "x=" + rect.getX() + ";y=" + rect.getY() + ";width=" + rect.getWidth() + ";height=" +rect.getHeight() );
+		Gdx.app.debug("Rect", "x=" + rect.getX() + ";y=" + rect.getY() + ";width=" + rect.getWidth() + ";height=" + rect.getHeight());
 	}
 
-	private boolean evalCollision(Element elementA, Element elementB, float startTime) {
+	private boolean evalCollision(Element elementA, Element elementB, double startTime) {
 
 		boolean doCollide = false;
 
@@ -196,7 +198,7 @@ public class IntersectorActor extends Actor {
 
 		if (elementA.getMovingBounds().overlaps(elementB.getMovingBounds())) {
 
-			Float percent;
+			Double percent;
 
 			if ((percent = checkHorizontaleCollision(elementB, elementA, rect2, rect1, rect4, rect3)) != null) {
 				evaluatedCollision.init(elementA, elementB, percent, CollisionType.HORIZONTAL, rect1, rect2, rect3, rect4, elementBBlocType, elementABlocType,
@@ -235,13 +237,13 @@ public class IntersectorActor extends Actor {
 	 * @param rectiB
 	 * @return
 	 */
-	Float checkHorizontaleCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB, MyRectangle rectiC, MyRectangle rectiD) {
+	Double checkHorizontaleCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB, MyRectangle rectiC, MyRectangle rectiD) {
 
-		Float result = null;
+		Double result = null;
 
 		if (elementA.getPreviousBounds().getXRight() <= elementB.getPreviousBounds().getX()
 				&& elementA.getCurrentBounds().getXRight() > elementB.getCurrentBounds().getX()) {
-			float percent = calcHorizontaleCollision(elementA, elementB, rectiA, rectiB);
+			double percent = calcHorizontaleCollision(elementA, elementB, rectiA, rectiB);
 
 			if ((rectiA.getYUp() > rectiB.getY() && rectiA.getY() < rectiB.getYUp())
 					|| (rectiA.getYUp() == rectiB.getY() && elementA.getCurrentBounds().getYUp() > elementB.getCurrentBounds().getY())
@@ -286,12 +288,14 @@ public class IntersectorActor extends Actor {
 
 		float deltaXRightA = elementA.getDeltaXRight();
 		float deltaXLeftB = elementB.getDeltaXLeft();
-
-		double percent = Math.abs((double)(x0LeftB - x0RightA) / (double)(deltaXRightA - deltaXLeftB));
+		
+		double percent = Math.abs((double) (x0LeftB - x0RightA) / (double) (deltaXRightA - deltaXLeftB));
+		// float percent = Math.abs((x0LeftB - x0RightA) / (deltaXRightA -
+		// deltaXLeftB));
 
 		elementA.getBoundsAtPercent(percent, rectiA);
 		elementB.getBoundsAtPercent(percent, rectiB);
-		return (float)(percent);
+		return (float) (percent);
 	}
 
 	/**
@@ -304,13 +308,13 @@ public class IntersectorActor extends Actor {
 	 * @param rectiB
 	 * @return
 	 */
-	Float checkVerticaleCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB, MyRectangle rectiC, MyRectangle rectiD) {
+	Double checkVerticaleCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB, MyRectangle rectiC, MyRectangle rectiD) {
 
-		Float result = null;
+		Double result = null;
 
 		if (elementA.getPreviousBounds().getYUp() <= elementB.getPreviousBounds().getY()
 				&& elementA.getCurrentBounds().getYUp() > elementB.getCurrentBounds().getY()) {
-			float percent = calcVerticalCollision(elementA, elementB, rectiA, rectiB);
+			double percent = calcVerticalCollision(elementA, elementB, rectiA, rectiB);
 
 			if ((rectiA.getXRight() > rectiB.getX() && rectiA.getX() < rectiB.getXRight())
 					|| (rectiA.getXRight() == rectiB.getX() && elementA.getCurrentBounds().getXRight() > rectiB.getX())
@@ -350,14 +354,16 @@ public class IntersectorActor extends Actor {
 		return result;
 	}
 
-	private float calcVerticalCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB) {
+	private double calcVerticalCollision(Element elementA, Element elementB, MyRectangle rectiA, MyRectangle rectiB) {
 		float y0DownB = elementB.getPreviousBounds().getY();
 		float y0UpA = elementA.getPreviousBounds().getYUp();
 
 		float deltaYUpA = elementA.getDeltaYUp();
 		float deltaYDownB = elementB.getDeltaYDown();
 
-		float percent = Math.abs((y0DownB - y0UpA) / (deltaYUpA - deltaYDownB));
+		// float percent = Math.abs((y0DownB - y0UpA) / (deltaYUpA -
+		// deltaYDownB));
+		double percent = Math.abs((double) (y0DownB - y0UpA) / (double) (deltaYUpA - deltaYDownB));
 
 		elementA.getBoundsAtPercent(percent, rectiA);
 		elementB.getBoundsAtPercent(percent, rectiB);

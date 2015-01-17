@@ -39,7 +39,7 @@ public class GameScreen implements Screen {
 				keyD = true;
 				break;
 			case Keys.C:
-				intersectorActor.setCheckCollisions(true);
+				collisionDetector.setCheckCollisions(true);
 				break;
 			default:
 				break;
@@ -107,7 +107,7 @@ public class GameScreen implements Screen {
 				for (Element element : dynaElements) {
 					if (element.getCurrentBounds().contains(mouseX, mouseY)) {
 						elementToDrag = element;
-						intersectorActor.setCheckCollisions(false);
+						collisionDetector.setCheckCollisions(false);
 						// Gdx.app.debug("TrackMouse", "my debug message");
 						break;
 					}
@@ -116,7 +116,7 @@ public class GameScreen implements Screen {
 					for (Element obstacle : obstacles) {
 						if (obstacle.getCurrentBounds().contains(mouseX, mouseY)) {
 							elementToDrag = obstacle;
-							intersectorActor.setCheckCollisions(false);
+							collisionDetector.setCheckCollisions(false);
 							// Gdx.app.debug("TrackMouse",
 							// "my debug message");
 							break;
@@ -157,7 +157,7 @@ public class GameScreen implements Screen {
 
 	Array<Element> dynaElements = new Array<Element>();
 
-	IntersectorActor intersectorActor = new IntersectorActor();
+	CollisionDetector collisionDetector = new CollisionDetector();
 
 	Array<Element> obstacles = new Array<Element>();
 
@@ -176,7 +176,7 @@ public class GameScreen implements Screen {
 		Element dyna2 = createDynamicElement(514, 225, 50, 50);
 		dyna2.getCurrentBounds().set(207, 225, 50, 50);
 		
-		intersectorActor.setDynamicElements(dynaElements);
+		collisionDetector.setDynamicElements(dynaElements);
 
 		dynaElements.add(dyna2);
 		
@@ -200,7 +200,14 @@ public class GameScreen implements Screen {
 		// obstacles.add(obstacle2);
 		// obstacles.add(obstacle3);
 
-		intersectorActor.setObstacles(obstacles);
+		Actor collisionActor = new Actor() {
+			@Override
+			public void act(float delta) {
+				collisionDetector.detectCollisions();
+			}
+		};
+		
+		collisionDetector.setObstacles(obstacles);
 
 		Actor elementCreator = new Actor() {
 			@Override
@@ -333,7 +340,7 @@ public class GameScreen implements Screen {
 		};
 
 		stage.addActor(elementActor);
-		stage.addActor(intersectorActor);
+		stage.addActor(collisionActor);
 		stage.addActor(elementCreator);
 		stage.addActor(elementRenderer);
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);

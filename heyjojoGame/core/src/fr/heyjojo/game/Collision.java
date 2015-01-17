@@ -1,12 +1,12 @@
 package fr.heyjojo.game;
 
-import fr.heyjojo.game.IntersectorActor.CollisionType;
+import fr.heyjojo.game.CollisionDetector.CollisionType;
 
 public class Collision {
 	public Element elementA;
 	public Element elementB;
 
-	public Float time;
+	public double time;
 
 	public MyRectangle rectA = new MyRectangle();
 	public MyRectangle rectB = new MyRectangle();
@@ -22,8 +22,6 @@ public class Collision {
 
 	public BlockType elementBBlocType;
 
-	public Float timeInter;
-
 	public CollisionType collisionType;
 
 	public boolean doUpdateElementAPosition;
@@ -31,7 +29,7 @@ public class Collision {
 	public boolean doUpdateElementBPosition;
 
 	public Collision(Element elementA, Element elementB) {
-		init(elementA, elementB, null, null, null, null, null, null, null, null, false, false);
+		init(elementA, elementB, 0d, null, null, null, null, null, null, null, false, false);
 	}
 
 	public Collision(Collision collision) {
@@ -41,7 +39,7 @@ public class Collision {
 	public Collision() {
 	}
 
-	public void init(Element elementA, Element elementB, Float time, CollisionType collisionType, MyRectangle rectA, MyRectangle rectB, MyRectangle rectC,
+	public void init(Element elementA, Element elementB, double time, CollisionType collisionType, MyRectangle rectA, MyRectangle rectB, MyRectangle rectC,
 			MyRectangle rectD, BlockType elementABlocType, BlockType elementBBlocType, boolean doUpdateElementAPosition, boolean doUpdateElementBPosition) {
 		this.elementA = elementA;
 		this.elementB = elementB;
@@ -87,11 +85,11 @@ public class Collision {
 		this.collisionType = collisionType;
 	}
 
-	public void setTime(Float time) {
+	public void setTime(double time) {
 		this.time = time;
 	}
 
-	public Float getTime() {
+	public double getTime() {
 		return time;
 	}
 

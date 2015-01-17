@@ -10,7 +10,7 @@ public class Element {
 
 	private MyRectangle movingBounds;
 
-	private float currentCollisionTime;
+	private double currentCollisionTime;
 
 	public boolean blockedLeft;
 	public boolean blockedRight;
@@ -72,17 +72,17 @@ public class Element {
 		return type;
 	}
 
-	public MyRectangle getBoundsAtGlobalPercent(final float percent, MyRectangle rectangle) {
+	public MyRectangle getBoundsAtGlobalPercent(final double percent, MyRectangle rectangle) {
 
-		float newLocalPercent = (percent - currentCollisionTime) / (1 - currentCollisionTime);
+		double newLocalPercent = (percent - currentCollisionTime) / (1 - currentCollisionTime);
 
-		rectangle.set(previousBounds.getX() + (newLocalPercent * getDeltaX()), previousBounds.getY() + (newLocalPercent * getDeltaY()),
+		rectangle.set((float) (previousBounds.getX() + (newLocalPercent * getDeltaX())), (float) (previousBounds.getY() + (newLocalPercent * getDeltaY())),
 				getWidthAtPercent(newLocalPercent), getHeightAtPercent(newLocalPercent));
 
 		return rectangle;
 	}
 
-	public void updatePreviousBoundsAtPercent(final float percent) {
+	public void updatePreviousBoundsAtPercent(final double percent) {
 		getBoundsAtGlobalPercent(percent, previousBounds);
 		currentCollisionTime = percent;
 		calcMovingBounds();
@@ -90,15 +90,31 @@ public class Element {
 
 	public MyRectangle getBoundsAtPercent(final double percent, MyRectangle rectangle) {
 
-		rectangle.set((float)(previousBounds.getX() + (percent * getDeltaX())), (float)(previousBounds.getY() + (percent * getDeltaY())), getWidthAtPercent(percent),
-				getHeightAtPercent(percent));
+		rectangle.set((float) (previousBounds.getX() + (percent * getDeltaX())), (float) (previousBounds.getY() + (percent * getDeltaY())),
+				getWidthAtPercent(percent), getHeightAtPercent(percent));
+
+		return rectangle;
+	}
+
+	public MyRectangle getBoundsAtPercent(final float percent, MyRectangle rectangle) {
+
+		rectangle.set((float) (previousBounds.getX() + (percent * getDeltaX())), (float) (previousBounds.getY() + (percent * getDeltaY())),
+				getWidthAtPercent(percent), getHeightAtPercent(percent));
 
 		return rectangle;
 	}
 
 	public float getWidthAtPercent(final double percent) {
 		if (getDeltaWidth() != 0) {
-			return (float)(previousBounds.getWidth() + (getDeltaWidth() * percent));
+			return (float) (previousBounds.getWidth() + (getDeltaWidth() * percent));
+		} else {
+			return currentBounds.getWidth();
+		}
+	}
+
+	private float getWidthAtPercent(final float percent) {
+		if (getDeltaWidth() != 0) {
+			return (float) (previousBounds.getWidth() + (getDeltaWidth() * percent));
 		} else {
 			return currentBounds.getWidth();
 		}
@@ -106,7 +122,15 @@ public class Element {
 
 	public float getHeightAtPercent(final double percent) {
 		if (getDeltaHeight() != 0) {
-			return (float)(previousBounds.getHeight() + (getDeltaHeight() * percent));
+			return (float) (previousBounds.getHeight() + (getDeltaHeight() * percent));
+		} else {
+			return currentBounds.getHeight();
+		}
+	}
+
+	private float getHeightAtPercent(final float percent) {
+		if (getDeltaHeight() != 0) {
+			return (float) (previousBounds.getHeight() + (getDeltaHeight() * percent));
 		} else {
 			return currentBounds.getHeight();
 		}
@@ -131,7 +155,7 @@ public class Element {
 		calcMovingBounds();
 	}
 
-	public void updateBoundsAfterCollision(MyRectangle newPreviousRect, MyRectangle newCurrentRect, float collisionTime, BlockType blockType) {
+	public void updateBoundsAfterCollision(MyRectangle newPreviousRect, MyRectangle newCurrentRect, double collisionTime, BlockType blockType) {
 		currentBounds.set(newCurrentRect);
 		previousBounds.set(newPreviousRect);
 
@@ -184,16 +208,16 @@ public class Element {
 		blockedDown = false;
 		calcMovingBounds();
 	}
-	
+
 	public void afterCollisionDetection() {
 		previousBounds.set(currentBounds);
 	}
 
-	public float getCurrentCollisionTime() {
+	public double getCurrentCollisionTime() {
 		return currentCollisionTime;
 	}
 
-	public void setCurrentCollisionTime(float currentCollisionTime) {
+	public void setCurrentCollisionTime(double currentCollisionTime) {
 		this.currentCollisionTime = currentCollisionTime;
 	}
 
